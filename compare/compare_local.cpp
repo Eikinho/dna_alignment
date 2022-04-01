@@ -57,7 +57,6 @@ void cout_sequency_init(Sequency sequency)
 
 Cursor init()
 {
-    cout << '\n';
     int m, n;
     cin >> n >> m;
 
@@ -167,7 +166,7 @@ int main()
 
     }
 
-    cout << "Score Máximo: " << max << endl;
+    cout << max << endl;
 
     return 0;
 }

@@ -320,7 +320,7 @@ int main()
 
     cursor.smith_waterman.score = score(cursor);
 
-    cout << "Score: " << cursor.smith_waterman.score << '\n';
+    cout << cursor.smith_waterman.score << '\n';
     
     return 0;
 } 
