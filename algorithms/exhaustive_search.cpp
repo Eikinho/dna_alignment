@@ -11,6 +11,7 @@
 #include <bits/stdc++.h>
 #include <vector>
 #include <string>
+#include <omp.h>
 
 // DEFINES
 #define MATCH 2

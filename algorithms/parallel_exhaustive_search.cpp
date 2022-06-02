@@ -1,7 +1,7 @@
 /*===========================================================
 # Author:       Eiki Yamashiro
 # Github:       github.com/Eikinho/smith_waterman
-# FileName:     algoritmo_local.cpp
+# FileName:     busca_exaustiva.cpp
 # Email:        eikisantos@outlook.com
 # Version:      0.0.1
 ===========================================================*/
@@ -10,9 +10,8 @@
 #include <iostream>
 #include <bits/stdc++.h>
 #include <vector>
-#include<random>
-#include<fstream>
-#include<omp.h>
+#include <string>
+#include <omp.h>
 
 // DEFINES
 #define MATCH 2
@@ -58,9 +57,6 @@ void cout_sequency_init(Sequency sequency)
 
 Cursor init()
 {
-    cout << "---------SMITH--WATERMAN---------" << '\n';
-    cout << "-------by--eiki--yamashiro-------" << '\n';
-    cout << '\n';
     int m, n;
     cin >> n >> m;
 
@@ -107,75 +103,79 @@ Cursor init()
     return return_cursor;
 }
 
-int score(vector<char> sa, vector<char> sb)
+// https://www.geeksforgeeks.org/convert-character-array-to-string-in-c/
+string convertToString(Sequency sequency)
 {
-    int result = 0;
-
-    for (int i = 0; i < int(sa.size()); i++){
-        if (sa[i] == sb[i]){
-            result += 2;
-        } else {
-            result -= 1;
-        }
+    vector<char> a = sequency.sequency;
+    int size = sequency.size;
+    int i;
+    string s = "";
+    for (i = 1; i < size+1; i++) {
+        s = s + a[i];
     }
-
-    return result;
+    return s;
 }
 
 int main()
 {
-
+    // reading .txt file that contains both sequencies. Create the cursor. 
     Cursor cursor = init();
     cout_sequency_init(cursor.one);
     cout_sequency_init(cursor.two);
-    cout << '\n';
-    cout << "---------------------------------" << '\n';
-    cout << '\n';
 
-    // A entrada two sempre é a maior
-    int seed = 404;
-    random_device device;
-    default_random_engine generator(seed);
-    uniform_int_distribution<int> distribution(1, cursor.two.size);
+    string s1 = convertToString(cursor.one);
+    string s2 = convertToString(cursor.two);
 
-    // Gerar k, sabendo que k + j <= cursor.two.size
-    int k = distribution(generator);
+    vector<string> subsequencies_one;
+    vector<string> subsequencies_two;
 
-    // Gerar j
-    uniform_int_distribution<int> j_distribution(0, cursor.two.size - k);
-    int j = j_distribution(generator);
-    
-    // Gerar cursor.two.sequency[j: k+j]
-    vector<char> sub_two;
-    for (int l = j; l<= j+k; l++)
+    string choosed_one;
+    string choosed_two;
+
+    int score = 0;
+    int max_score = 0;
+
+    for (unsigned int i = 0; i < s1.size(); i++)
     {
-        sub_two.push_back(cursor.two.sequency[l]);
+        for (unsigned int j = 0; j < s1.size(); j++)
+        {
+            subsequencies_one.push_back(s1.substr(i,j));
+        }
     }
 
-    // Gerar um p inteiro aleatorio
-    int p = distribution(generator);
-    vector<char> sub_one;
-    int max = 0;
-
-    for (int l = 0; l <= p; l++)
+    for (unsigned int i = 0; i < s2.size(); i++)
     {
-        uniform_int_distribution<int> i_distribution(0, cursor.one.size - k);
-        int i = i_distribution(generator);
-        sub_one.clear();
-        for (int o = i; o <= i+k; o++)
+        for (unsigned int j = 0; j < s2.size(); j++)
         {
-            sub_one.push_back(cursor.one.sequency[o]);
+            subsequencies_two.push_back(s2.substr(i,j));
         }
-
-        int score_ = score(sub_one, sub_two);
-        if (score_ > max)
-        {
-            max = score_;
-        }
-
     }
 
-    cout << "Score Máximo: " << max << endl;
+    #pragma omp parallel
+    for (unsigned int i = 0; i < subsequencies_one.size(); i++)
+    {
+        for (unsigned int j = 0; j < subsequencies_two.size(); j++)
+        {
+            if(int(subsequencies_one[i].size()) == int(subsequencies_two[j].size()))
+            {
+                score = 0;
+                for (unsigned int k = 0; subsequencies_one[i].size(); i++)
+                {
+                    score += is_match(subsequencies_one[i][k], subsequencies_two[j][k]);
+                }
+                if (score > max_score)
+                {
+                    choosed_one = subsequencies_one[i];
+                    choosed_two = subsequencies_two[j];
+                    max_score = score;
+                }
+            }             
+        }
+    }
+
+    cout << max_score << endl;
 
     return 0;
-}
+} 
+
+// g++ 
