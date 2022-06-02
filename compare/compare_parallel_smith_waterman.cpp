@@ -10,6 +10,7 @@
 #include <iostream>
 #include <bits/stdc++.h>
 #include <vector>
+#include <omp.h>
 
 // DEFINES
 #define MATCH 2
@@ -192,6 +193,7 @@ vector<vector<Point>> smith_waterman(Cursor cursor)
     int insertion = 0;
     int temp_max = 0;
 
+    #pragma omp parallel for
     for (int i = 1; i <= cursor.one.size; i++)
     {
         for (int j = 1; j <= cursor.two.size; j++)
@@ -314,6 +316,8 @@ int main()
     // reading .txt file that contains the both sequencies. Create the cursor. 
     Cursor cursor = init();
     
+    omp_set_num_threads(4);
+
     cursor.smith_waterman.matrix = create_matrix(cursor.one, cursor.two);
 
     cursor.smith_waterman.matrix = smith_waterman(cursor);
